@@ -45,14 +45,14 @@
             const priceCell = document.getElementById("binancePrice");
             const timeCell = document.getElementById("binanceTime");
             priceCell.innerHTML = price.toFixed(2);
-            timeCell.innerHTML = time.getHours() + ":" + time.getMinutes() + ":" + time.getSeconds();
+            timeCell.innerHTML = ("0" + time.getHours()).slice(-2) + ":" + ("0" + time.getMinutes()).slice(-2) + ":" + ("0" + time.getSeconds()).slice(-2);
             console.log(event.data);
         }
         const UpdateKuna = (price, time) => {
             const priceCell = document.getElementById("kunaPrice");
             const timeCell = document.getElementById("kunaTime");
             priceCell.innerHTML = price.toFixed(2);
-            timeCell.innerHTML = time.getHours() + ":" + time.getMinutes() + ":" + time.getSeconds();
+            timeCell.innerHTML = ("0" + time.getHours()).slice(-2) + ":" + ("0" + time.getMinutes()).slice(-2) + ":" + ("0" + time.getSeconds()).slice(-2);
         }
 
         const GetKunaPrice = () => {
