@@ -71,10 +71,10 @@
             timeCell.innerHTML = ("0" + time.getHours()).slice(-2) + ":" + ("0" + time.getMinutes()).slice(-2) + ":" + ("0" + time.getSeconds()).slice(-2);
 
         }
-        const UpdateKuna = (price, time) => {
+        const UpdateKuna = (bidPrice, askPrice, time) => {
             const priceCell = document.getElementById("kunaPrice");
             const timeCell = document.getElementById("kunaTime");
-            priceCell.innerHTML = price.toFixed(2);
+            priceCell.innerHTML = `Ask: ${askPrice.toFixed(2)} <br> Bid: ${bidPrice.toFixed(2)}`;
             timeCell.innerHTML = ("0" + time.getHours()).slice(-2) + ":" + ("0" + time.getMinutes()).slice(-2) + ":" + ("0" + time.getSeconds()).slice(-2);
         }
 
@@ -89,7 +89,7 @@
             fetch('https://api.kuna.io/v3/tickers?symbols=usdtuah')
                 .then((response) => response.json())
                 .then((data) => {
-                    UpdateKuna(data[0][1],new Date())
+                    UpdateKuna(data[0][1],data[0][3],new Date())
                 });
         }
 
