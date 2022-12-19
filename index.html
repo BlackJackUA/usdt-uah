@@ -60,28 +60,28 @@
         const UpdateHuobi = (askPrice, bidPrice, time) => {
             const priceCell = document.getElementById("huobiPrice");
             const timeCell = document.getElementById("huobiTime");
-            priceCell.innerHTML = `Ask: ${askPrice.toFixed(2)} <br> Bid: ${bidPrice.toFixed(2)}`;
+            priceCell.innerHTML = `Ask: ${askPrice.toFixed(3)} <br> Bid: ${bidPrice.toFixed(3)}`;
             timeCell.innerHTML = ("0" + time.getHours()).slice(-2) + ":" + ("0" + time.getMinutes()).slice(-2) + ":" + ("0" + time.getSeconds()).slice(-2);
         }
 
         const UpdateBinance = (price, time) => {
             const priceCell = document.getElementById("binancePrice");
             const timeCell = document.getElementById("binanceTime");
-            priceCell.innerHTML = price.toFixed(2);
+            priceCell.innerHTML = price.toFixed(3);
             timeCell.innerHTML = ("0" + time.getHours()).slice(-2) + ":" + ("0" + time.getMinutes()).slice(-2) + ":" + ("0" + time.getSeconds()).slice(-2);
 
         }
         const UpdateKuna = (bidPrice, askPrice, time) => {
             const priceCell = document.getElementById("kunaPrice");
             const timeCell = document.getElementById("kunaTime");
-            priceCell.innerHTML = `Ask: ${askPrice.toFixed(2)} <br> Bid: ${bidPrice.toFixed(2)}`;
+            priceCell.innerHTML = `Ask: ${askPrice.toFixed(3)} <br> Bid: ${bidPrice.toFixed(3)}`;
             timeCell.innerHTML = ("0" + time.getHours()).slice(-2) + ":" + ("0" + time.getMinutes()).slice(-2) + ":" + ("0" + time.getSeconds()).slice(-2);
         }
 
         const UpdateWhitebit = (price, time) => {
             const priceCell = document.getElementById("whiteBitPrice");
             const timeCell = document.getElementById("whiteBitTime");
-            priceCell.innerHTML = price.toFixed(2);
+            priceCell.innerHTML = price.toFixed(3);
             timeCell.innerHTML = ("0" + time.getHours()).slice(-2) + ":" + ("0" + time.getMinutes()).slice(-2) + ":" + ("0" + time.getSeconds()).slice(-2);
         }
 
@@ -153,7 +153,6 @@
         huobiSocket.binaryType = 'arraybuffer';
 
         huobiSocket.onopen = function (e) {
-            
             huobiSocket.send(JSON.stringify({ 'sub': 'market.usdtuah.ticker' }))
         };
 
@@ -162,7 +161,6 @@
         };
 
         huobiSocket.onmessage = (event) => {
-
             let raw_data = event.data;
             let json = pako.inflate(new Uint8Array(raw_data), { to: 'string' });
             let data = JSON.parse(json);
