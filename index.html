@@ -57,31 +57,36 @@
         integrity="sha512-g2TeAWw5GPnX7z0Kn8nFbYfeHcvAu/tx6d6mrLe/90mkCxO+RcptyYpksUz35EO337F83bZwcmUyHiHamspkfg=="
         crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script>
-        const UpdateHuobi = (askPrice, bidPrice, time) => {
+        const whiteBitCommision = 0.1
+        const kunaCommision = 0.25
+        const huobiCommision = 0.2
+
+        const UpdateHuobi = (bidPrice, askPrice, time) => {
             const priceCell = document.getElementById("huobiPrice");
             const timeCell = document.getElementById("huobiTime");
-            priceCell.innerHTML = `Ask: ${askPrice.toFixed(3)} <br> Bid: ${bidPrice.toFixed(3)}`;
+            priceCell.innerHTML = getPriceString(bidPrice, askPrice, huobiCommision)
             timeCell.innerHTML = ("0" + time.getHours()).slice(-2) + ":" + ("0" + time.getMinutes()).slice(-2) + ":" + ("0" + time.getSeconds()).slice(-2);
         }
 
-        const UpdateBinance = (price, time) => {
+        const UpdateBinance = (bidPrice, askPrice, time) => {
             const priceCell = document.getElementById("binancePrice");
             const timeCell = document.getElementById("binanceTime");
-            priceCell.innerHTML = price.toFixed(3);
+            priceCell.innerHTML = `Ask: ${askPrice.toFixed(4)} <br> Bid: ${bidPrice.toFixed(4)}`;
             timeCell.innerHTML = ("0" + time.getHours()).slice(-2) + ":" + ("0" + time.getMinutes()).slice(-2) + ":" + ("0" + time.getSeconds()).slice(-2);
 
         }
         const UpdateKuna = (bidPrice, askPrice, time) => {
             const priceCell = document.getElementById("kunaPrice");
             const timeCell = document.getElementById("kunaTime");
-            priceCell.innerHTML = `Ask: ${askPrice.toFixed(3)} <br> Bid: ${bidPrice.toFixed(3)}`;
+            priceCell.innerHTML = 
+                priceCell.innerHTML = getPriceString(bidPrice, askPrice, kunaCommision)
             timeCell.innerHTML = ("0" + time.getHours()).slice(-2) + ":" + ("0" + time.getMinutes()).slice(-2) + ":" + ("0" + time.getSeconds()).slice(-2);
         }
 
-        const UpdateWhitebit = (price, time) => {
+        const UpdateWhitebit = (bidPrice, askPrice, time) => {
             const priceCell = document.getElementById("whiteBitPrice");
             const timeCell = document.getElementById("whiteBitTime");
-            priceCell.innerHTML = price.toFixed(3);
+            priceCell.innerHTML = getPriceString(bidPrice, askPrice, whiteBitCommision)
             timeCell.innerHTML = ("0" + time.getHours()).slice(-2) + ":" + ("0" + time.getMinutes()).slice(-2) + ":" + ("0" + time.getSeconds()).slice(-2);
         }
 
@@ -93,15 +98,17 @@
                 });
         }
 
+        const getPriceString = (bidPrice, askPrice, commision) => {
+            return `Ask: ${askPrice.toFixed(4)} + ${commision}% = ${(askPrice * (1 + (commision / 100))).toFixed(4)} <br> Bid: ${bidPrice.toFixed(4)} - ${commision}% = ${(askPrice * (1 - (commision / 100))).toFixed(4)}`;
+        }
+
         /////////////////////// binance socket end ////////////////////////
 
-        const binanceSocket = new WebSocket("wss://stream.binance.com:443/ws/usdtuah@aggTrade");
-        
+        const binanceSocket = new WebSocket("wss://stream.binance.com:443/ws/usdtuah@bookTicker");
+
         binanceSocket.onmessage = function (event) {
             const tick = JSON.parse(event.data);
-            const price = parseFloat(tick.p);
-            const time = new Date(tick.T);
-            UpdateBinance(price, time);            
+            UpdateBinance(parseFloat(tick.b), parseFloat(tick.a), new Date());
         };
 
         binanceSocket.onerror = function (error) {
@@ -116,11 +123,18 @@
         const whitebitSocket = new WebSocket("wss://api.whitebit.com/ws");
 
         whitebitSocket.onopen = function (e) {
-            whitebitSocket.send(`{
-            "id": 1,
-                "method": "lastprice_subscribe",
-                    "params": ["USDT_UAH"]
-            }`);
+
+            setInterval(() => {
+                whitebitSocket.send(`{
+                    "id": 11,
+                    "method": "depth_request",
+                    "params": [
+                        "USDT_UAH",
+                        1,
+                        "0"
+                    ]
+                }`);
+            },2000)
 
             setInterval(()=> {
                 whitebitSocket.send(`{
@@ -137,13 +151,7 @@
 
         whitebitSocket.onmessage = (event) => {            
             const tick = JSON.parse(event.data);
-            // console.log(tick);
-            if(tick.method === "lastprice_update"){
-                if(tick.params[0] === "USDT_UAH"){
-                    const price = parseFloat(tick.params[1]);
-                    UpdateWhitebit(price, new Date());
-                }
-            }                        
+            UpdateWhitebit(parseFloat(tick.result.bids[0][0]), parseFloat(tick.result.asks[0][0]), new Date());                       
         }
 
         /////////////////////// whitebit socket end ////////////////////////
@@ -169,7 +177,7 @@
                 huobiSocket.send(JSON.stringify({ 'pong': data['ping'] }));
                 return;
             }else if(data['tick']){
-                UpdateHuobi(data['tick']['ask'], data['tick']['bid'], new Date(data['ts']))
+                UpdateHuobi(data['tick']['bid'], data['tick']['ask'], new Date(data['ts']))
             }
         }
 
