@@ -103,11 +103,12 @@
         }
 
         const getPriceString = (bidPrice, askPrice, commision) => {
+
             let askString = `Ask: ${askPrice.toFixed(4)}`
             let bidString =` <br> Bid: ${bidPrice.toFixed(4)}`
             if(commision != null){
                 askString += ` <br> + ${commision}% = ${(askPrice * (1 + (commision / 100))).toFixed(4)}`;
-                bidString += ` <br> - ${commision}% = ${(askPrice * (1 - (commision / 100))).toFixed(4)}`
+                bidString += ` <br> - ${commision}% = ${(bidPrice * (1 - (commision / 100))).toFixed(4)}`
             }
             return askString + bidString
         }
