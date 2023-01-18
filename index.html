@@ -61,6 +61,7 @@
         crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script>
         const whiteBitCommision = 0.1
+        const binanceCommision = 0.1
         const kunaCommision = 0.25
         const huobiCommision = 0.2
 
@@ -74,7 +75,7 @@
         const UpdateBinance = (bidPrice, askPrice, time) => {
             const priceCell = document.getElementById("binancePrice");
             const timeCell = document.getElementById("binanceTime");
-            priceCell.innerHTML = getPriceString(bidPrice, askPrice, null)
+            priceCell.innerHTML = getPriceString(bidPrice, askPrice, binanceCommision)
             timeCell.innerHTML = ("0" + time.getHours()).slice(-2) + ":" + ("0" + time.getMinutes()).slice(-2) + ":" + ("0" + time.getSeconds()).slice(-2);
 
         }
