@@ -188,7 +188,7 @@
                 huobiSocket.send(JSON.stringify({ 'pong': data['ping'] }));
                 return;
             }else if(data['tick']){
-                UpdateHuobi(data['tick']['bid'], data['tick']['ask'], new Date(data['ts']))
+                UpdateHuobi(data['tick']['bid'], data['tick']['ask'], new Date())
             }
         }
 
