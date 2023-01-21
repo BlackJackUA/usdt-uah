@@ -5,12 +5,13 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>USDT-UAH</title>
+    <link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.21.2/dist/bootstrap-table.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous">
 </head>
 
 <body>
-    <table class="table">
+    <!-- <table class="table">
         <thead>
             <tr>
                 <th scope="col">#</th>
@@ -45,13 +46,36 @@
                 <td id="huobiTime">Loading..</td>
             </tr>
         </tbody>
+    </table> -->
+
+    <table id="table"
+    data-toggle="table"
+    data-toolbar="#toolbar"
+    data-height="460"
+    data-show-columns="true"
+        >
+        <thead>
+            <tr>
+                <th data-field="id">id</th>
+                <th data-field="ask">ask</th>
+                <th data-field="bid">bid</th>
+                <th data-field="commision">com</th>
+                <th data-field="askWithCommision">ask+</th>
+                <th data-field="bidWithCommision">bid+</th>
+                <th data-field="time">time</th>
+            </tr>
+        </thead>
     </table>
+
     <div>
         <button style="display: block; margin-left: auto; margin-right: auto" type="button" disabled id="updateButton" class="btn btn-outline-dark">Update Kuna</button>
     </div>
     <div>
         <h4 style="text-align: center">"Упущенная выгода" 😉</h4>
     </div>
+    <script src="https://code.jquery.com/jquery-3.6.3.js" integrity="sha256-nQLuAZGRRcILA+6dMBOvcRh5Pe310sBpanc6+QBmyVM="
+        crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/bootstrap-table@1.21.2/dist/bootstrap-table.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-OERcA2EqjJCMA+/3y+gxIOqMEjwtxJY7qPCqsdltbNJuaOe923+mo//f6V8Qbsw3"
         crossorigin="anonymous"></script>
@@ -64,7 +88,7 @@
         const binanceCommision = 0.1
         const kunaCommision = 0.25
         const huobiCommision = 0.2
-
+        const $table = $('#table')
         let tableRows = []
 
         // row = {
@@ -81,12 +105,12 @@
             if(!tableRows.some((row)=>{
                 if(row.id === id){
                     {
-                        row.ask = ask,
-                        row.bid = bid,
+                        row.ask = ask.toFixed(4),
+                        row.bid = bid.toFixed(4),
                         row.commision = commision,
-                        row.askWithCommision = ask + (1 + commision / 100),
-                        row.bidWithCommision = bid + (1 - commision / 100),
-                        row.time = time
+                        row.askWithCommision = (ask + (1 + commision / 100)).toFixed(4),
+                        row.bidWithCommision = (bid + (1 - commision / 100)).toFixed(4),
+                        row.time = getTimeFormat(time)
                     }
                     return true
                 }else{
@@ -95,48 +119,63 @@
             })){
                 tableRows.push({
                     id: id,
-                    ask: ask,
-                    bid: bid,
+                    ask: ask.toFixed(4),
+                    bid: bid.toFixed(4),
                     commision: commision,
-                    askWithCommision: ask * (1 + commision/100),
-                    bidWithCommision: bid * (1 - commision / 100),
-                    time: time
+                    askWithCommision: (ask * (1 + commision/100)).toFixed(4),
+                    bidWithCommision: (bid * (1 - commision / 100)).toFixed(4),
+                    time: getTimeFormat(time)
                 })
             }
             LoadTable()
         }
 
         const LoadTable = () => {
+            $table.bootstrapTable('load', tableRows)
+        }
 
+        const getTimeFormat = (time) => {
+            return ("0" + time.getHours()).slice(-2) + ":" + ("0" + time.getMinutes()).slice(-2) + ":" + ("0" + time.getSeconds()).slice(-2)
+        }
+
+        const configColumns = () => {
+            $table.bootstrapTable('hideAllColumns')
+            columns = JSON.parse(localStorage.getItem('columns'));
+            columns.forEach(column => {
+                $table.bootstrapTable('showColumn', column)
+            });
         }
 
         const UpdateHuobi = (bidPrice, askPrice, time) => {
-            const priceCell = document.getElementById("huobiPrice");
-            const timeCell = document.getElementById("huobiTime");
-            priceCell.innerHTML = getPriceString(bidPrice, askPrice, huobiCommision)
-            timeCell.innerHTML = ("0" + time.getHours()).slice(-2) + ":" + ("0" + time.getMinutes()).slice(-2) + ":" + ("0" + time.getSeconds()).slice(-2);
+            UpdateRows("Huobi", askPrice, bidPrice, huobiCommision, time)
+            // const priceCell = document.getElementById("huobiPrice");
+            // const timeCell = document.getElementById("huobiTime");
+            // priceCell.innerHTML = getPriceString(bidPrice, askPrice, huobiCommision)
+            // timeCell.innerHTML = ("0" + time.getHours()).slice(-2) + ":" + ("0" + time.getMinutes()).slice(-2) + ":" + ("0" + time.getSeconds()).slice(-2);
         }
 
         const UpdateBinance = (bidPrice, askPrice, time) => {
-            const priceCell = document.getElementById("binancePrice");
-            const timeCell = document.getElementById("binanceTime");
-            priceCell.innerHTML = getPriceString(bidPrice, askPrice, binanceCommision)
-            timeCell.innerHTML = ("0" + time.getHours()).slice(-2) + ":" + ("0" + time.getMinutes()).slice(-2) + ":" + ("0" + time.getSeconds()).slice(-2);
+            UpdateRows("Binance", askPrice, bidPrice, binanceCommision, time)
+            // const priceCell = document.getElementById("binancePrice");
+            // const timeCell = document.getElementById("binanceTime");
+            // priceCell.innerHTML = getPriceString(bidPrice, askPrice, binanceCommision)
+            // timeCell.innerHTML = ("0" + time.getHours()).slice(-2) + ":" + ("0" + time.getMinutes()).slice(-2) + ":" + ("0" + time.getSeconds()).slice(-2);
 
         }
         const UpdateKuna = (bidPrice, askPrice, time) => {
-            const priceCell = document.getElementById("kunaPrice");
-            const timeCell = document.getElementById("kunaTime");
-            priceCell.innerHTML = 
-                priceCell.innerHTML = getPriceString(bidPrice, askPrice, kunaCommision)
-            timeCell.innerHTML = ("0" + time.getHours()).slice(-2) + ":" + ("0" + time.getMinutes()).slice(-2) + ":" + ("0" + time.getSeconds()).slice(-2);
+            UpdateRows("Kuna", askPrice, bidPrice, kunaCommision, time)
+            // const priceCell = document.getElementById("kunaPrice");
+            // const timeCell = document.getElementById("kunaTime");
+            // priceCell.innerHTML = priceCell.innerHTML = getPriceString(bidPrice, askPrice, kunaCommision)
+            // timeCell.innerHTML = ("0" + time.getHours()).slice(-2) + ":" + ("0" + time.getMinutes()).slice(-2) + ":" + ("0" + time.getSeconds()).slice(-2);
         }
 
         const UpdateWhitebit = (bidPrice, askPrice, time) => {
-            const priceCell = document.getElementById("whiteBitPrice");
-            const timeCell = document.getElementById("whiteBitTime");
-            priceCell.innerHTML = getPriceString(bidPrice, askPrice, whiteBitCommision)
-            timeCell.innerHTML = ("0" + time.getHours()).slice(-2) + ":" + ("0" + time.getMinutes()).slice(-2) + ":" + ("0" + time.getSeconds()).slice(-2);
+            UpdateRows("Whitebit", askPrice, bidPrice, whiteBitCommision, time)
+            // const priceCell = document.getElementById("whiteBitPrice");
+            // const timeCell = document.getElementById("whiteBitTime");
+            // priceCell.innerHTML = getPriceString(bidPrice, askPrice, whiteBitCommision)
+            // timeCell.innerHTML = ("0" + time.getHours()).slice(-2) + ":" + ("0" + time.getMinutes()).slice(-2) + ":" + ("0" + time.getSeconds()).slice(-2);
         }
 
         const GetKunaPrice = () => {
@@ -190,7 +229,7 @@
                         "0"
                     ]
                 }`);
-            },2000)
+            },5000)
 
             setInterval(()=> {
                 whitebitSocket.send(`{
@@ -207,9 +246,11 @@
 
         whitebitSocket.onmessage = (event) => {            
             const tick = JSON.parse(event.data);
-            UpdateWhitebit(parseFloat(tick.result.bids[0][0]), parseFloat(tick.result.asks[0][0]), new Date());                       
+            //if id 11
+            if(tick.id === 11){
+                UpdateWhitebit(parseFloat(tick.result.bids[0][0]), parseFloat(tick.result.asks[0][0]), new Date());
+            }
         }
-
         /////////////////////// whitebit socket end ////////////////////////
         
         /////////////////////// huobi socket start ////////////////////////
