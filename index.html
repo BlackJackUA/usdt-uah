@@ -11,50 +11,13 @@
 </head>
 
 <body>
-    <!-- <table class="table">
-        <thead>
-            <tr>
-                <th scope="col">#</th>
-                <th scope="col">Service</th>
-                <th scope="col">Price</th>
-                <th scope="col">Last update</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <th scope="row">1</th>                
-                <td>Binance</td>
-                <td id="binancePrice">Loading..</td>
-                <td id="binanceTime">Loading..</td>
-            </tr>
-            <tr>
-                <th scope="row">2</th>
-                <td>Kuna</td>
-                <td id="kunaPrice">Loading..</td>
-                <td id="kunaTime">Loading..</td>
-            </tr>
-            <tr>
-                <th scope="row">3</th>
-                <td>WhiteBit</td>
-                <td id="whiteBitPrice">Loading..</td>
-                <td id="whiteBitTime">Loading..</td>
-            </tr>
-            <tr>
-                <th scope="row">4</th>
-                <td>Huobi</td>
-                <td id="huobiPrice">Loading..</td>
-                <td id="huobiTime">Loading..</td>
-            </tr>
-        </tbody>
-    </table> -->
-
     <table id="table"
     data-toggle="table"
     data-toolbar="#toolbar"
     data-height="460"
     data-show-columns="true"
-    table-striped="true"
-        >
+    class="table-striped table-sm customSort"
+    >
         <thead>
             <tr>
                 <th data-field="id">id</th>
@@ -71,9 +34,6 @@
     <div>
         <button style="display: block; margin-left: auto; margin-right: auto" type="button" disabled id="updateButton" class="btn btn-outline-dark">Update Kuna</button>
     </div>
-    <div>
-        <h4 style="text-align: center">"Упущенная выгода" 😉</h4>
-    </div>
     <script src="https://code.jquery.com/jquery-3.6.3.js" integrity="sha256-nQLuAZGRRcILA+6dMBOvcRh5Pe310sBpanc6+QBmyVM="
         crossorigin="anonymous"></script>
     <script src="https://unpkg.com/bootstrap-table@1.21.2/dist/bootstrap-table.min.js"></script>
@@ -89,21 +49,48 @@
         const kunaCommision = 0.25
         const huobiCommision = 0.2
         const $table = $('#table')
-        let tableRows = []
-
-        // row = {
-        //     id: "exchangeName",
-        //     ask: 321,
-        //     bid: 123,
-        //     commision: 0.1,
-        //     askWithCommision: 321.321,
-        //     bidWithCommision: 122.877,
-        //     time:"04:12:22"
-        // }
+        let tableRows = [
+            {
+                id: "Binance",
+                ask: "...",
+                bid: "...",
+                commision: binanceCommision,
+                askWithCommision: "...",
+                bidWithCommision: "...",
+                time: "..."
+            },
+            {
+                id: "Kuna",
+                ask: "...",
+                bid: "...",
+                commision: kunaCommision,
+                askWithCommision: "...",
+                bidWithCommision: "...",
+                time: "..."
+            },
+            {
+                id: "Whitebit",
+                ask: "...",
+                bid: "...",
+                commision: whiteBitCommision,
+                askWithCommision: "...",
+                bidWithCommision: "...",
+                time: "..."
+            },
+            {
+                id: "Huobi",
+                ask: "...",
+                bid: "...",
+                commision: huobiCommision,
+                askWithCommision: "...",
+                bidWithCommision: "...",
+                time: "..."
+            }]
 
         setTimeout(() => {
             configColumns()
-        }, 0);        
+        }, 0)
+
 
         $('#table').bootstrapTable({
             onColumnSwitch: (field, checked) => {
@@ -111,7 +98,8 @@
             }
         })
 
-        const UpdateRows = (id, ask, bid, commision, time) => {
+        const UpdateRows = (id, ask, bid, commision) => {
+            time = new Date()
             if(!tableRows.some((row)=>{
                 if(row.id === id){
                     {
@@ -183,41 +171,19 @@
                     visible: false
                 })
             });
-            console.log(JSON.stringify(columnSetings))
             localStorage.setItem('columns', JSON.stringify(columnSetings))
-        }
-
-        const UpdateHuobi = (bidPrice, askPrice, time) => {
-            UpdateRows("Huobi", askPrice, bidPrice, huobiCommision, time)
-        }
-
-        const UpdateBinance = (bidPrice, askPrice, time) => {
-            UpdateRows("Binance", askPrice, bidPrice, binanceCommision, time)
-        }
-        const UpdateKuna = (bidPrice, askPrice, time) => {
-            UpdateRows("Kuna", askPrice, bidPrice, kunaCommision, time)
-        }
-
-        const UpdateWhitebit = (bidPrice, askPrice, time) => {
-            UpdateRows("Whitebit", askPrice, bidPrice, whiteBitCommision, time)
         }
 
         const GetKunaPrice = () => {
             fetch('https://api.kuna.io/v3/tickers?symbols=usdtuah')
                 .then((response) => response.json())
                 .then((data) => {
-                    UpdateKuna(data[0][1],data[0][3],new Date())
+                    UpdateRows(
+                        "Kuna",
+                        data[0][3],
+                        data[0][1],
+                        kunaCommision)
                 });
-        }
-
-        const getPriceString = (bidPrice, askPrice, commision) => {
-            let askString = `Ask: ${askPrice.toFixed(4)}`
-            let bidString =` <br> Bid: ${bidPrice.toFixed(4)}`
-            if(commision != null){
-                askString += ` <br> + ${commision}% = ${(askPrice * (1 + (commision / 100))).toFixed(4)}`;
-                bidString += ` <br> - ${commision}% = ${(bidPrice * (1 - (commision / 100))).toFixed(4)}`
-            }
-            return askString + bidString
         }
 
         /////////////////////// binance socket end ////////////////////////
@@ -226,7 +192,11 @@
 
         binanceSocket.onmessage = function (event) {
             const tick = JSON.parse(event.data);
-            UpdateBinance(parseFloat(tick.b), parseFloat(tick.a), new Date());
+            UpdateRows(
+                "Binance",
+                parseFloat(parseFloat(tick.a)),
+                parseFloat(parseFloat(tick.b)),
+                binanceCommision)
         };
 
         binanceSocket.onerror = function (error) {
@@ -234,7 +204,6 @@
         };
 
         /////////////////////// binance socket end ////////////////////////
-
 
         /////////////////////// whitebit socket start ////////////////////////
 
@@ -271,7 +240,11 @@
             const tick = JSON.parse(event.data);
             //if id 11
             if(tick.id === 11){
-                UpdateWhitebit(parseFloat(tick.result.bids[0][0]), parseFloat(tick.result.asks[0][0]), new Date());
+                UpdateRows(
+                    "Whitebit",
+                    parseFloat(tick.result.asks[0][0]),
+                    parseFloat(tick.result.bids[0][0]),
+                    whiteBitCommision)
             }
         }
         /////////////////////// whitebit socket end ////////////////////////
@@ -297,27 +270,34 @@
                 huobiSocket.send(JSON.stringify({ 'pong': data['ping'] }));
                 return;
             }else if(data['tick']){
-                UpdateHuobi(data['tick']['bid'], data['tick']['ask'], new Date())
+                UpdateRows(
+                    "Huobi",
+                    data['tick']['ask'],
+                    data['tick']['bid'],
+                    huobiCommision)
             }
         }
 
         /////////////////////// huobi socket end ////////////////////////
 
-        const updateButton = document.getElementById("updateButton");
-        updateButton.addEventListener("click",(e)=>{
-            e.preventDefault();
-            updateButton.setAttribute("disabled","true");
+        const UpdateButton = document.getElementById("updateButton");
+
+        const UpdateKuna = () => {
+            UpdateButton.setAttribute("disabled", "true");
             GetKunaPrice();
-            setTimeout(()=>{
-                updateButton.removeAttribute("disabled");
-            },5000)
+
+            setTimeout(() => {
+                UpdateButton.removeAttribute("disabled");
+            }, 5000)
+        }
+
+        UpdateButton.addEventListener("click",(e)=>{
+            e.preventDefault();
+            UpdateKuna()
         })
 
-        GetKunaPrice();
-
-        setTimeout(() => {
-            updateButton.removeAttribute("disabled");
-        }, 5000)
+        UpdateKuna()
+        
     </script>
 </body>
 
