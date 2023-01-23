@@ -106,8 +106,8 @@
                         row.ask = ask.toFixed(4),
                         row.bid = bid.toFixed(4),
                         row.commision = commision,
-                        row.askWithCommision = (ask + (1 + commision / 100)).toFixed(4),
-                        row.bidWithCommision = (bid + (1 - commision / 100)).toFixed(4),
+                        row.askWithCommision = (ask * (1 + commision / 100)).toFixed(4),
+                        row.bidWithCommision = (bid * (1 - commision / 100)).toFixed(4),
                         row.time = getTimeFormat(time)
                     }
                     return true
