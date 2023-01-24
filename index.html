@@ -188,14 +188,15 @@
 
         /////////////////////// binance socket end ////////////////////////
 
-        const binanceSocket = new WebSocket("wss://stream.binance.com:443/ws/usdtuah@bookTicker");
+        const binanceSocket = new WebSocket("wss://stream.binance.com:443/ws/usdtuah@aggTrade");
 
         binanceSocket.onmessage = function (event) {
-            const tick = JSON.parse(event.data);
+            const tick = JSON.parse(event.data)
+            const price = parseFloat(parseFloat(tick.p))
             UpdateRows(
                 "Binance",
-                parseFloat(parseFloat(tick.a)),
-                parseFloat(parseFloat(tick.b)),
+                price,
+                price,
                 binanceCommision)
         };
 
