@@ -141,9 +141,9 @@
             try {
                 columns = JSON.parse(localStorage.getItem('columns'));
                 columns.forEach(column => {
-                    if(column.visible){
+                    if(column.visible | column.name === "id" | column.name === "time"){
                         $table.bootstrapTable('showColumn', column.name)
-                    }else{  
+                    }else{
                         $table.bootstrapTable('hideColumn', column.name)
                     }
                 });
