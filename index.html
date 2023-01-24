@@ -48,6 +48,8 @@
         const binanceCommision = 0.1
         const kunaCommision = 0.25
         const huobiCommision = 0.2
+
+        const buttonLockTime = 5
         const $table = $('#table')
         let tableRows = [
             {
@@ -283,21 +285,29 @@
 
         const UpdateButton = document.getElementById("updateButton");
 
-        const UpdateKuna = () => {
+        const UpdateKuna = (secondsLeft) => {
             UpdateButton.setAttribute("disabled", "true");
-            GetKunaPrice();
-
-            setTimeout(() => {
-                UpdateButton.removeAttribute("disabled");
-            }, 5000)
+            
+            if(secondsLeft === 0){
+                UpdateButton.removeAttribute("disabled")
+                UpdateButton.innerHTML = "Update Kuna"
+            }else{
+                if (buttonLockTime === secondsLeft) {
+                    GetKunaPrice();
+                }
+                UpdateButton.innerHTML = `locked ${secondsLeft}`
+                setTimeout(() => {
+                    UpdateKuna(secondsLeft - 1)
+                }, 1000);
+            } 
         }
 
         UpdateButton.addEventListener("click",(e)=>{
             e.preventDefault();
-            UpdateKuna()
+            UpdateKuna(buttonLockTime)
         })
 
-        UpdateKuna()
+        UpdateKuna(buttonLockTime)
         
     </script>
 </body>
