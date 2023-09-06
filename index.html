@@ -177,13 +177,14 @@
         }
 
         const GetKunaPrice = () => {
-            fetch('https://api.kuna.io/v3/tickers?symbols=usdtuah')
+            // fetch('https://api.kuna.io/v3/tickers?symbols=usdtuah')
+            fetch('https://api.kuna.io/v4/markets/public/tickers?pairs=usdt_uah')
                 .then((response) => response.json())
                 .then((data) => {
                     UpdateRows(
                         "Kuna",
-                        data[0][3],
-                        data[0][1],
+                        Number(data["data"][0]["high"]),
+                        Number(data["data"][0]["low"]),
                         kunaCommision)
                 });
         }
