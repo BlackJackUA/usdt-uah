@@ -71,6 +71,15 @@
                 time: "..."
             },
             {
+                id: "Kuna2",
+                ask: "...",
+                bid: "...",
+                commision: kunaCommision,
+                askWithCommision: "...",
+                bidWithCommision: "...",
+                time: "..."
+            },
+            {
                 id: "Whitebit",
                 ask: "...",
                 bid: "...",
@@ -283,6 +292,52 @@
         }
 
         /////////////////////// huobi socket end ////////////////////////
+
+        /////////////////////// kuna socket start ////////////////////////
+        const kunaSocket = new WebSocket("wss://ws-pro.kuna.io/socketcluster/");
+        // kunaSocket.binaryType = 'arraybuffer';
+        const handshake = {
+                "event": "#handshake",
+                "data": {
+                    "authToken": null
+                },
+                "cid": 1
+            }
+        const subscribe = {
+                "event": "#subscribe",
+                "data": {
+                    "channel": "usdt_uah@ticker"
+                },
+                "cid": 2
+            }
+        kunaSocket.onopen = function (e) {
+            kunaSocket.send(JSON.stringify(handshake))
+            kunaSocket.send(JSON.stringify(subscribe))
+        };
+
+        kunaSocket.onerror = function (error) {
+            console.log(`kunaSocket: [error]`);
+        };
+
+        kunaSocket.onmessage = (event) => {
+            // let raw_data = event.data;
+            // let json = pako.inflate(new Uint8Array(raw_data), { to: 'string' });
+
+            try {
+                let data = JSON.parse(event.data);
+                let symbol = data["data"]["data"]["data"]
+                UpdateRows(
+                    "Kuna2",
+                    Number(symbol['bap']),
+                    Number(symbol['bbp']),
+                    kunaCommision)
+                console.log(symbol)
+            } catch (error) {
+                kunaSocket.send("")
+            }
+        }
+
+        /////////////////////// kuna socket end ////////////////////////
 
         const UpdateButton = document.getElementById("updateButton");
 
